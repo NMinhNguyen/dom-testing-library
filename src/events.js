@@ -350,6 +350,11 @@ const eventAliasMap = {
   doubleClick: 'dblClick',
 }
 
+const canFireKeyboardEvent = element =>
+  element === document.activeElement ||
+  element === document.body ||
+  element === document.documentElement
+
 function fireEvent(element, event) {
   if (!event) {
     throw new Error(`Unable to fire an event - please provide an event object.`)
@@ -357,6 +362,14 @@ function fireEvent(element, event) {
   if (!element) {
     throw new Error(
       `Unable to fire a "${event.type}" event - please provide a DOM element.`,
+    )
+  }
+  if (
+    event.constructor.name === 'KeyboardEvent' &&
+    !canFireKeyboardEvent(element)
+  ) {
+    throw new Error(
+      `Unable to fire a "${event.type}" KeyboardEvent on an element that is not the activeElement (it has no focus). Please focus the element first or manually set document.activeElement to it.`,
     )
   }
   return element.dispatchEvent(event)
